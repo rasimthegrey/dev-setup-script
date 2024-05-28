@@ -70,19 +70,29 @@ install_docker() {
     sudo systemctl enable docker > /dev/null 2>&1
     sudo systemctl start docker > /dev/null 2>&1
 }
-install_docker
-
-
-# echo -e "\033[34m----------\nSETTING UP DEV ENVIRONMENT...\n----------\033[0m" 
-
+# Check if docker already installed
+docker version > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo -e "$green_prefix"Docker already installed."$suffix"
+else
+    install_docker
+fi
 
 # Create project directories
 mkdir -p ~/dev-env/
 mkdir -p ~/dev-env/nginx
 
+# Check if git already installed:
+git version > /dev/null 2>&1
+if [ $? != 0 ]; then
+    sudo apt-get install -y git > /dev/null 2>&1
+fi
+
 # Clone Vue.js repository:
 cd ~/dev-env
-git clone https://github.com/vuejs/v2.vuejs.org.git
+echo -e "$blue_prefix"Cloning project repository into ~/dev-env/v2.vuejs.org..."$suffix"
+git clone https://github.com/vuejs/v2.vuejs.org.git > /dev/null 2>&1
+echo -e "$green_prefix"Successful."$suffix"
 cd ..
 
 # Create Vue.js (Node.js) Dockerfile:
@@ -134,12 +144,11 @@ services:
       - app
 EOL
 
-
-# echo -e "\033[32m----------\nDONE\n----------\033[0m"
-# echo -e "\033[34m----------\nSTARTING DEV ENVIRONMENT...\n----------\033[0m" 
-
-
 # Start development environment
 cd ~/dev-env
-sudo docker-compose up -d
-sudo docker-compose down
+docker-compose up -d
+
+echo "Development environment setup has been successfully completed."
+echo "App is running at http://localhost:8080"
+echo "You can access code files by changing directory into project directory by using: cd ~/dev-env/v2.vuejs.org"
+
